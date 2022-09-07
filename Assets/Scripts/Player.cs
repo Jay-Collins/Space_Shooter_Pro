@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
 using UnityEngine;
 
 public class Player : MonoBehaviour 
@@ -12,12 +13,24 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float _fireRate = 0.5f;
     private float _canFire = -1f;
+    [SerializeField]
+    private int _playerLives = 3;
 
-    // Start is called before the first frame update
-    void Start()
+    private SpawnManager _spawnManager;
+
+
+// Start is called before the first frame update
+void Start()
     {
         // take the current position = new position (0,0,0)
         transform.position = new Vector3(0, -1, 0);
+        // define _spawnManager variable. 
+        _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+
+        if (_spawnManager == null)
+        {
+            Debug.LogError("The spawn manager is NULL.");
+        }
     }
 
     // Update is called once per frame
@@ -64,5 +77,20 @@ public class Player : MonoBehaviour
     { 
         _canFire = Time.time + _fireRate;
         Instantiate(_laserPrefab, transform.position + new Vector3(0, 0.7f, 0), Quaternion.identity);
+    }
+
+    public void Damage()
+    {
+        _playerLives -= 1;
+
+        // check if dead
+        // destroy us
+        if (_playerLives < 1 )
+        {
+            // communicate with spawn manager
+            // tell it to stop spawning
+            _spawnManager.StopSpawning();
+            Destroy(this.gameObject);
+        }
     }
 }
