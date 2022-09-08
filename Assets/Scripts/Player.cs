@@ -11,13 +11,16 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _laserPrefab;
     [SerializeField]
+    private GameObject _trippleShotPrefab;
+    [SerializeField]
     private float _fireRate = 0.5f;
     private float _canFire = -1f;
     [SerializeField]
     private int _playerLives = 3;
-
+    private bool _trippleShotEnabled = false;
     private SpawnManager _spawnManager;
-
+    [SerializeField]
+    private float _trippleShotTimer = 5;
 
 // Start is called before the first frame update
 void Start()
@@ -55,14 +58,9 @@ void Start()
 
         transform.Translate(direction * _speed * Time.deltaTime);
 
-        // if  player position on the y is greater than 0
-        // y position = 0
-        // else if position on the y is than -3.8f
-        // y pos = -3.8f
         transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, -3.8f, 0), 0);
 
-        // if player position on the x is greater than 11 set to -11
-        // else if player position on the x is less than -11 set to 11
+        // if player position on the x is greater than 11 set to -11 // else if player position on the x is less than -11 set to 11
         if (transform.position.x > 11)
         {
             transform.position = new Vector3(-11, transform.position.y, 0);
@@ -73,24 +71,44 @@ void Start()
         }
     }
 
+    // ShootLaser method
     void ShootLaser()
-    { 
+    {
         _canFire = Time.time + _fireRate;
-        Instantiate(_laserPrefab, transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+        if (_trippleShotEnabled == true)
+        {
+            Instantiate(_trippleShotPrefab, transform.position + new Vector3(0, 0, 0), Quaternion.identity);
+        }
+        else
+        {
+            Instantiate(_laserPrefab, transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+        }
     }
 
     public void Damage()
     {
         _playerLives -= 1;
 
-        // check if dead
-        // destroy us
+        // check if dead // destroy us
         if (_playerLives < 1 )
         {
-            // communicate with spawn manager
-            // tell it to stop spawning
+            // communicate with spawn manager // tell it to stop spawning
             _spawnManager.StopSpawning();
             Destroy(this.gameObject);
         }
+    }
+
+    public void TrippleShotActive()
+    {
+        // activate tripple shot // start power down coroutine for tripple shot
+        _trippleShotEnabled = true;
+        StartCoroutine(TrippleShotPowerDownRoutine());
+    }
+
+    // IEnumerator TrippleShotPowerDownRoutine // wait 5 seconds // set tripple shot to false
+    IEnumerator TrippleShotPowerDownRoutine()
+    {
+        yield return new WaitForSeconds(_trippleShotTimer);
+        _trippleShotEnabled = false;
     }
 }
