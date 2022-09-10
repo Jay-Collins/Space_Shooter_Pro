@@ -4,14 +4,11 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour
 {
-    [SerializeField]
-    private float _speed = 3;
+    [SerializeField]private float _speed = 3;
+    [SerializeField] private int _powerupID; // 0 = Triple shot, 1= speed, 2= shields.
 
     // Update is called once per frame
-    void Update()
-    {
-        PowerupMovement();
-    }
+    void Update() => PowerupMovement();
 
     // ontriggercollision // only collectable by the player, use tags // on collected destroy // communicate with player script 
     private void OnTriggerEnter2D(Collider2D other)
@@ -22,9 +19,19 @@ public class PowerUp : MonoBehaviour
 
             if (player != null)
             {
-                player.TrippleShotActive();
+                switch (_powerupID)
+                {
+                    case 0:
+                        player.TripleShotActive();
+                        break;
+                    case 1:
+                        player.SpeedBoostActive();
+                        break;
+                    case 2:
+                        player.SheildsActive();
+                        break;
+                }
             }
-
             Object.Destroy(this.gameObject);
         }
     }

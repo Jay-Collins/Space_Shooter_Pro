@@ -6,23 +6,12 @@ using UnityEngine;
 
 public class SpawnManager : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject _enemyContainer;
-    [SerializeField]
-    private GameObject _enemyPrefab;
-    [SerializeField]
-    private GameObject _trippleShotPrefab;
-    
-    [SerializeField]
-    private float _spawnTimer = 5;
-    
-    [SerializeField]
-    private float _trippleShotSpawnTimer;
-
-
     private bool _spawnEnabled = true;
     private bool _spawnPowerupEnabled = false;
-
+    [SerializeField] private GameObject _enemyContainer, _enemyPrefab;
+    [SerializeField] private GameObject[] _powerups;
+    [SerializeField] private float _spawnTimer = 5;
+    [SerializeField] private float _trippleShotSpawnTimer;
 
     // Start is called before the first frame update
     void Start()
@@ -31,24 +20,11 @@ public class SpawnManager : MonoBehaviour
         StartCoroutine(SpawnPowerupRoutine());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    // spawn game object every 5 seconds
-    // create a coroutine of type IEnumerator -- Yield Events
-    // while loop
-
     IEnumerator SpawnEnemyRoutine()
     {
-        //while loop (infinite loop)
-        //Instantiate enemy prefab
-        //yield wait for 5 seconds
         while (_spawnEnabled == true)
         {
-            float randomX = Random.Range(-9.15f, 9.15f);
+            var randomX = Random.Range(-9.15f, 9.15f);
             Vector3 posToSpawn = new Vector3(randomX, 7.35f, 0);
 
             GameObject newEnemy = Instantiate(_enemyPrefab, posToSpawn, Quaternion.identity);
@@ -63,27 +39,18 @@ public class SpawnManager : MonoBehaviour
         yield return new WaitForSeconds(_spawnTimer);
         _spawnPowerupEnabled = true;
 
-        while (_spawnPowerupEnabled == true && _spawnEnabled == true)
+        while (_spawnPowerupEnabled && _spawnEnabled )
         {
-            float randomX = Random.Range(-9.15f, 9.15f);
+            var randomX = Random.Range(-9.15f, 9.15f);
             Vector3 posToSpawn = new Vector3(randomX, 7.35f, 0);
-            _trippleShotSpawnTimer = Random.Range(3f, 8f);
+            _trippleShotSpawnTimer = Random.Range(8f, 12f);
 
-            GameObject newPowerup = Instantiate(_trippleShotPrefab, posToSpawn, Quaternion.identity);
+            var randomPowerup = Random.Range(0, 3);
+            GameObject newPowerup = Instantiate(_powerups[randomPowerup], posToSpawn, Quaternion.identity);
             yield return new WaitForSeconds(_trippleShotSpawnTimer);
         }
-        
     }
 
-    public void StopSpawning()
-    {
-        _spawnEnabled = false;
-    }
-
-    public void SpawnLocation()
-    {
-        float randomX = Random.Range(-9.15f, 9.15f);
-        Vector3 posToSpawn = new Vector3(randomX, 7.35f, 0);
-    }
+    public void StopSpawning() => _spawnEnabled = false;
 }
 
