@@ -11,12 +11,13 @@ public class Player : MonoBehaviour
     private float _canFire = -1f;
     private bool _trippleShotEnabled, _shieldsEnabled;
     private SpawnManager _spawnManager;
+    private UImanager _uiManager;
 
     [Header("General Settings")]
     [SerializeField] private float _speed = 3.0f;
     [SerializeField] private float _fireRate = 0.5f;
     [SerializeField] private int _playerLives = 3;
-    [SerializeField] private int _score;
+    [SerializeField] private int _score = 0;
 
     [Header("Power-up Settings")]
     [SerializeField] private float _trippleShotTimer = 5;
@@ -24,19 +25,29 @@ public class Player : MonoBehaviour
 
     [Header("Prefab Settings")]
     [SerializeField] private GameObject _shieldVisulizer;
-    [SerializeField] private GameObject _laserPrefab, _trippleShotPrefab;
+    [SerializeField] private GameObject _leftDamageVisualizer;
+    [SerializeField] private GameObject _rightDamageVisualizer;
+    [SerializeField] private GameObject _laserPrefab;
+    [SerializeField] private GameObject _trippleShotPrefab;
 
     // Start is called before the first frame update
     void Start()
     {
         // take the current position = new position (0,0,0)
         transform.position = new Vector3(0, -1, 0);
-        // define _spawnManager variable. 
+ 
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+
+        _uiManager = GameObject.Find("Canvas").GetComponent<UImanager>();
 
         if (_spawnManager == null)
         {
             Debug.LogError("The spawn manager is NULL.");
+        }
+
+        if (_uiManager == null)
+        {
+            Debug.LogError("The uiManager is NULL.");
         }
     }
 
@@ -61,7 +72,6 @@ public class Player : MonoBehaviour
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0);
 
         transform.Translate(direction * _speed * Time.deltaTime);
-
 
         transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, -3.8f, 0), 0);
 
@@ -103,9 +113,21 @@ public class Player : MonoBehaviour
         else
         {
             _playerLives -= 1;
+            _uiManager.LivesUpdate(_playerLives);
+
+            if (_playerLives == 2)
+            {
+                _leftDamageVisualizer.SetActive(true);
+            }
+            else if (_playerLives == 1)
+            {
+                _rightDamageVisualizer.SetActive(true);
+            }
+
             if (_playerLives < 1)
             {
-                // communicate with spawn manager // tell it to stop spawning
+                // communicate with spawn manager // tell it to stop spawning // Visualize game over text
+                _uiManager.GameOverDisplay();
                 _spawnManager.StopSpawning();
                 Destroy(this.gameObject);
             }
@@ -144,5 +166,10 @@ public class Player : MonoBehaviour
         _shieldVisulizer.SetActive(true);
     }
 
-    // method to add 10 to the score
+    // method to add 10 to the score // communicate with UI to update score
+    public void ScoreUpdate(int points)
+    {
+        _score += points;
+        _uiManager.ScoreUpdate(_score);
+    }
 }

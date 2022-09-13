@@ -2,26 +2,55 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class UImanager : MonoBehaviour
 {
-    // handle to Text
+    private int _score = 0;
+    private GameManager _gameManager;
+    [SerializeField] private Image _livesImage;
+    [SerializeField] private TMP_Text _gameOverText;
     [SerializeField] private TMP_Text _scoreText;
-
-    private int _points = 0;
+    [SerializeField] private TMP_Text _restartText;
+    [SerializeField] private Sprite[] _liveSprites;
 
     // Start is called before the first frame update
     void Start()
     {
-        // asign text component to the handle
-        _scoreText.text = "Score: " + _points;
+
+        _scoreText.text = "Score: " + _score;
+        _gameOverText.gameObject.SetActive(false);
+        _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
+
+        if (_gameManager == null)
+        {
+            Debug.LogError("GameManager is NULL");
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ScoreUpdate(int playerScore)
     {
-        
+        _scoreText.text = "Score: " + playerScore.ToString();
     }
 
-    public void ScoreUpdate() => _points += 10;
+    public void LivesUpdate(int currentLives) => _livesImage.sprite = _liveSprites[currentLives];
+
+    public void GameOverDisplay()
+    {
+        _gameManager.GameOver();
+        _gameOverText.gameObject.SetActive(true);
+        _restartText.gameObject.SetActive(true);
+        StartCoroutine(GameOverFlicker());
+    }
+    IEnumerator GameOverFlicker()
+    {
+        WaitForSeconds _waitForSeconds = new(0.2f);
+        while (true)
+        {
+            yield return _waitForSeconds;
+            _gameOverText.gameObject.SetActive(false);
+            yield return _waitForSeconds;
+            _gameOverText.gameObject.SetActive(true);
+        }
+    }
 }

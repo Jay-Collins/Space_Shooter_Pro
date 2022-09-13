@@ -7,7 +7,7 @@ using UnityEngine;
 public class SpawnManager : MonoBehaviour
 {
     private bool _spawnEnabled = true;
-    private bool _spawnPowerupEnabled = false;
+    private bool _spawnPowerupEnabled;
     [SerializeField] private GameObject _enemyContainer, _enemyPrefab;
     [SerializeField] private GameObject[] _powerups;
     [SerializeField] private float _spawnTimer = 5;
@@ -16,12 +16,18 @@ public class SpawnManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        
+    }
+
+    public void StartSpawning()
+    {
         StartCoroutine(SpawnEnemyRoutine());
         StartCoroutine(SpawnPowerupRoutine());
     }
 
     IEnumerator SpawnEnemyRoutine()
     {
+        yield return new WaitForSeconds(5);
         while (_spawnEnabled == true)
         {
             var randomX = Random.Range(-9.15f, 9.15f);
