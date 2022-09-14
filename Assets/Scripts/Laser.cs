@@ -15,14 +15,8 @@ public class Laser : MonoBehaviour
         transform.Translate(new Vector3(0, 1, 0) * _Speed * Time.deltaTime);
 
         // if laser position is greater than 7 on y axis // destroy the object
-        if (transform.position.y > 9f)
-        {
-            // check if this object has a parent // if it does, destroy the parent
-            if (transform.parent != null)
-            {
-                Object.Destroy(transform.parent.gameObject);
-            }
-            Object.Destroy(this.gameObject);
-        }
+        if (transform.position.y < 9f) return;
+        if (transform.parent) Destroy(transform.parent.gameObject);
+        Destroy(gameObject);
     }
 }

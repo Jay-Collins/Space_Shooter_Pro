@@ -17,7 +17,7 @@ public class PowerUp : MonoBehaviour
         {
             Player player = other.GetComponent<Player>();
 
-            if (player != null)
+            if (!player)
             {
                 switch (_powerupID)
                 {
@@ -32,7 +32,7 @@ public class PowerUp : MonoBehaviour
                         break;
                 }
             }
-            Object.Destroy(this.gameObject);
+            Destroy(gameObject);
         }
     }
 
@@ -43,7 +43,7 @@ public class PowerUp : MonoBehaviour
 
         if (transform.position.y < -6f)
         {
-            Object.Destroy(this.gameObject);
+            Destroy(gameObject);
         }
     }
 }

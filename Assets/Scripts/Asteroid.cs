@@ -7,16 +7,21 @@ public class Asteroid : MonoBehaviour
     
     private Player _player;
     private SpawnManager _spawnManager;
-    [SerializeField] private GameObject _exposionPrefab, _explosionContainer, _circleCollider;
-    [SerializeField] float _speed = 3;
+    private CircleCollider2D _circleCollider;
+    [SerializeField] private GameObject _exposionPrefab;
     [SerializeField] float _rotateSpeed = 10f;
+
+    private void Awake()
+    {
+        _circleCollider = GetComponent<CircleCollider2D>(); 
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
         _player = GameObject.Find("Player").GetComponent<Player>();
-        if (_player == null)
+        if (!_player)
         {
             Debug.LogError("Player is NULL");
         }
@@ -32,7 +37,9 @@ public class Asteroid : MonoBehaviour
     {
         if (other.CompareTag("Laser"))
         {
+            _circleCollider.enabled = false;
             Destroy(other.gameObject);
+         
             _spawnManager.StartSpawning();
             AsteroidDeathSequence();
         }
@@ -46,16 +53,14 @@ public class Asteroid : MonoBehaviour
     void AsteroidMovement()
     {
         transform.Rotate(new Vector3(0, 0, 1) * _rotateSpeed * Time.deltaTime);
-        if (transform.position.y < -6.0f)
-        {
-            Destroy(this.gameObject);
-        }
+
+        if (transform.position.y > -6.0f) return;
+        Destroy(gameObject);
     }
 
     void AsteroidDeathSequence()
     {
-        Destroy(this._circleCollider);
         Instantiate(_exposionPrefab, transform.position, Quaternion.identity);
-        Destroy(this.gameObject, 1.2f);
+        Destroy(gameObject, 1.2f);
     }
 }

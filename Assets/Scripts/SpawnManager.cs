@@ -13,12 +13,6 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private float _spawnTimer = 5;
     [SerializeField] private float _trippleShotSpawnTimer;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     public void StartSpawning()
     {
         StartCoroutine(SpawnEnemyRoutine());

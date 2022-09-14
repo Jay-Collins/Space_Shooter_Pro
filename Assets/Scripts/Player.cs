@@ -4,14 +4,23 @@ using System.IO;
 using TMPro;
 using UnityEditor.Search;
 using UnityEngine;
+using static System.Net.WebRequestMethods;
 
-public class Player : MonoBehaviour 
+public class Player : MonoBehaviour
 {
+
     private float _speedMultiplier = 1.5f;
     private float _canFire = -1f;
     private bool _trippleShotEnabled, _shieldsEnabled;
-    private SpawnManager _spawnManager;
-    private UImanager _uiManager;
+    private bool _movementDisabled;
+    private bool _shootingDisabled;
+    private BoxCollider2D _boxCollider2D;
+    private SpriteRenderer _spriterRenderer;
+
+    [Header("Managers")]
+    [SerializeField] private SpawnManager _spawnManager;
+    [SerializeField] private UImanager _uiManager;
+    [SerializeField] private AudioManager _audioManager;
 
     [Header("General Settings")]
     [SerializeField] private float _speed = 3.0f;
@@ -27,35 +36,42 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _shieldVisulizer;
     [SerializeField] private GameObject _leftDamageVisualizer;
     [SerializeField] private GameObject _rightDamageVisualizer;
+    [SerializeField] private GameObject _thrusterVisualizer;
     [SerializeField] private GameObject _laserPrefab;
     [SerializeField] private GameObject _trippleShotPrefab;
+    [SerializeField] private GameObject _exposionPrefab;
 
     // Start is called before the first frame update
+
+    private void Awake()
+    {
+        _boxCollider2D = GetComponent<BoxCollider2D>();
+
+        NullChecks();
+    }
+    private void NullChecks()
+    {
+        if (!_spawnManager) Debug.LogError("The spawn manager is NULL.");
+
+        if (!_uiManager) Debug.LogError("The uiManager is NULL.");
+
+        if (!_audioManager) Debug.LogError("The AudioSource is NULL");
+    }
+
     void Start()
     {
         // take the current position = new position (0,0,0)
         transform.position = new Vector3(0, -1, 0);
- 
-        _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
-
-        _uiManager = GameObject.Find("Canvas").GetComponent<UImanager>();
-
-        if (_spawnManager == null)
-        {
-            Debug.LogError("The spawn manager is NULL.");
-        }
-
-        if (_uiManager == null)
-        {
-            Debug.LogError("The uiManager is NULL.");
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
         CalculateMovement();
-        
+
+        //if (!(Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)) return;
+        //ShootLaser();
+
         if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
         {
             ShootLaser();
@@ -65,24 +81,27 @@ public class Player : MonoBehaviour
     // player movement method
     void CalculateMovement()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-
-        // new Vector3(1, 0, 0) * input * speed * real time
-        Vector3 direction = new Vector3(horizontalInput, verticalInput, 0);
-
-        transform.Translate(direction * _speed * Time.deltaTime);
-
-        transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, -3.8f, 0), 0);
-
-        // if player position on the x is greater than 11 set to -11 // else if player position on the x is less than -11 set to 11
-        if (transform.position.x > 11)
+        if (_movementDisabled != true)
         {
-            transform.position = new Vector3(-11, transform.position.y, 0);
-        }
-        else if (transform.position.x < -11)
-        {
-            transform.position = new Vector3(11, transform.position.y, 0);
+            var horizontalInput = Input.GetAxis("Horizontal");
+            var verticalInput = Input.GetAxis("Vertical");
+
+            // new Vector3(1, 0, 0) * input * speed * real time
+            var direction = new Vector3(horizontalInput, verticalInput, 0);
+
+            transform.Translate(direction * _speed * Time.deltaTime);
+
+            transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, -3.8f, 0), 0);
+
+            // if player position on the x is greater than 11 set to -11 // else if player position on the x is less than -11 set to 11
+            if (transform.position.x > 11)
+            {
+                transform.position = new Vector3(-11, transform.position.y, 0);
+            }
+            else if (transform.position.x < -11)
+            {
+                transform.position = new Vector3(11, transform.position.y, 0);
+            }
         }
     }
 
@@ -90,19 +109,20 @@ public class Player : MonoBehaviour
     void ShootLaser()
     {
         _canFire = Time.time + _fireRate;
-        if (_trippleShotEnabled == true)
+        if (_trippleShotEnabled)
         {
             Instantiate(_trippleShotPrefab, transform.position + new Vector3(0, 0, 0), Quaternion.identity);
+            _audioManager.PlayLaserSound();
         }
-        else
+        else if (!_shootingDisabled)
         {
             Instantiate(_laserPrefab, transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+            _audioManager.PlayLaserSound();
         }
     }
 
     public void Damage()
     {
-
         // if shields is active // do nothing // deactivate shields
         if (_shieldsEnabled)
         {
@@ -126,10 +146,7 @@ public class Player : MonoBehaviour
 
             if (_playerLives < 1)
             {
-                // communicate with spawn manager // tell it to stop spawning // Visualize game over text
-                _uiManager.GameOverDisplay();
-                _spawnManager.StopSpawning();
-                Destroy(this.gameObject);
+                StartCoroutine(PlayerDeathSequence());
             }
         }
     }
@@ -162,7 +179,7 @@ public class Player : MonoBehaviour
 
     public void SheildsActive()
     {
-        _shieldsEnabled = true;
+        _shieldsEnabled = true; 
         _shieldVisulizer.SetActive(true);
     }
 
@@ -172,4 +189,23 @@ public class Player : MonoBehaviour
         _score += points;
         _uiManager.ScoreUpdate(_score);
     }
+
+    IEnumerator PlayerDeathSequence()
+    {
+        Instantiate(_exposionPrefab, transform.position, Quaternion.identity);
+        _movementDisabled = true;
+        _shootingDisabled = true;
+        _trippleShotEnabled = false;
+        _thrusterVisualizer.SetActive(false);
+        _leftDamageVisualizer.SetActive(false);
+        _rightDamageVisualizer.SetActive(false);
+        _uiManager.GameOverDisplay();
+        _spawnManager.StopSpawning();
+        _audioManager.PlayExplosionSound();
+        Destroy(this._boxCollider2D);
+        yield return new WaitForSeconds(1.2f);
+        _spriterRenderer.enabled = false;
+        Destroy(this.gameObject, 1.7f);
+    }
+
 }
