@@ -13,7 +13,7 @@ public class Asteroid : MonoBehaviour
 
     private void Awake()
     {
-        _circleCollider = GetComponent<CircleCollider2D>(); 
+        _circleCollider = GetComponent<CircleCollider2D>();
     }
 
     // Start is called before the first frame update

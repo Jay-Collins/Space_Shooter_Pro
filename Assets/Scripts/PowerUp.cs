@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour
 {
-    [SerializeField]private float _speed = 3;
+    [SerializeField] private AudioClip _powerupSFXClip;
+    [SerializeField] private float _speed = 3;
     [SerializeField] private int _powerupID; // 0 = Triple shot, 1= speed, 2= shields.
 
     // Update is called once per frame
-    void Update() => PowerupMovement();
+    void Update()
+    {
+        PowerupMovement();
+    }
 
     // ontriggercollision // only collectable by the player, use tags // on collected destroy // communicate with player script 
     private void OnTriggerEnter2D(Collider2D other)
@@ -17,7 +21,9 @@ public class PowerUp : MonoBehaviour
         {
             Player player = other.GetComponent<Player>();
 
-            if (!player)
+            AudioSource.PlayClipAtPoint(_powerupSFXClip, transform.position);
+
+            if (player)
             {
                 switch (_powerupID)
                 {
@@ -28,7 +34,7 @@ public class PowerUp : MonoBehaviour
                         player.SpeedBoostActive();
                         break;
                     case 2:
-                        player.SheildsActive();
+                        player.ShieldsActive();
                         break;
                 }
             }

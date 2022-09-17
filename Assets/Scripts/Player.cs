@@ -2,25 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
-using UnityEditor.Search;
 using UnityEngine;
 using static System.Net.WebRequestMethods;
 
 public class Player : MonoBehaviour
 {
-
     private float _speedMultiplier = 1.5f;
     private float _canFire = -1f;
     private bool _trippleShotEnabled, _shieldsEnabled;
     private bool _movementDisabled;
     private bool _shootingDisabled;
     private BoxCollider2D _boxCollider2D;
-    private SpriteRenderer _spriterRenderer;
+    private AudioSource _audioSource;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
 
     [Header("Managers")]
     [SerializeField] private SpawnManager _spawnManager;
     [SerializeField] private UImanager _uiManager;
-    [SerializeField] private AudioManager _audioManager;
 
     [Header("General Settings")]
     [SerializeField] private float _speed = 3.0f;
@@ -46,21 +44,18 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         _boxCollider2D = GetComponent<BoxCollider2D>();
+        _audioSource = GetComponent<AudioSource>();
 
         NullChecks();
     }
     private void NullChecks()
     {
         if (!_spawnManager) Debug.LogError("The spawn manager is NULL.");
-
         if (!_uiManager) Debug.LogError("The uiManager is NULL.");
-
-        if (!_audioManager) Debug.LogError("The AudioSource is NULL");
     }
 
     void Start()
     {
-        // take the current position = new position (0,0,0)
         transform.position = new Vector3(0, -1, 0);
     }
 
@@ -72,13 +67,9 @@ public class Player : MonoBehaviour
         //if (!(Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)) return;
         //ShootLaser();
 
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
-        {
-            ShootLaser();
-        }
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire) ShootLaser();
     }
 
-    // player movement method
     void CalculateMovement()
     {
         if (_movementDisabled != true)
@@ -105,19 +96,18 @@ public class Player : MonoBehaviour
         }
     }
 
-    // ShootLaser method
     void ShootLaser()
     {
         _canFire = Time.time + _fireRate;
         if (_trippleShotEnabled)
         {
             Instantiate(_trippleShotPrefab, transform.position + new Vector3(0, 0, 0), Quaternion.identity);
-            _audioManager.PlayLaserSound();
+            _audioSource.Play();
         }
         else if (!_shootingDisabled)
         {
             Instantiate(_laserPrefab, transform.position + new Vector3(0, 1, 0), Quaternion.identity);
-            _audioManager.PlayLaserSound();
+            _audioSource.Play();
         }
     }
 
@@ -135,30 +125,27 @@ public class Player : MonoBehaviour
             _playerLives -= 1;
             _uiManager.LivesUpdate(_playerLives);
 
-            if (_playerLives == 2)
+            switch (_playerLives)
             {
-                _leftDamageVisualizer.SetActive(true);
-            }
-            else if (_playerLives == 1)
-            {
-                _rightDamageVisualizer.SetActive(true);
-            }
-
-            if (_playerLives < 1)
-            {
-                StartCoroutine(PlayerDeathSequence());
-            }
+                case 0:
+                    StartCoroutine(PlayerDeathSequence());
+                    break;
+                case 1:
+                    _rightDamageVisualizer.SetActive(true);
+                    break;
+                case 2:
+                    _leftDamageVisualizer.SetActive(true);
+                    break;
+            }   
         }
     }
 
     public void TripleShotActive()
     {
-        // activate tripple shot // start power down coroutine for tripple shot
         _trippleShotEnabled = true;
         StartCoroutine(TripleShotPowerDownRoutine());
     }
 
-    // IEnumerator TrippleShotPowerDownRoutine // wait 5 seconds // set tripple shot to false
     IEnumerator TripleShotPowerDownRoutine()
     {
         yield return new WaitForSeconds(_trippleShotTimer);
@@ -177,7 +164,7 @@ public class Player : MonoBehaviour
         _speed /= _speedMultiplier;
     }
 
-    public void SheildsActive()
+    public void ShieldsActive()
     {
         _shieldsEnabled = true; 
         _shieldVisulizer.SetActive(true);
@@ -201,11 +188,9 @@ public class Player : MonoBehaviour
         _rightDamageVisualizer.SetActive(false);
         _uiManager.GameOverDisplay();
         _spawnManager.StopSpawning();
-        _audioManager.PlayExplosionSound();
-        Destroy(this._boxCollider2D);
+        Destroy(_boxCollider2D);
         yield return new WaitForSeconds(1.2f);
-        _spriterRenderer.enabled = false;
-        Destroy(this.gameObject, 1.7f);
+        _spriteRenderer.enabled = false;
+        Destroy(gameObject, 1.7f);
     }
-
 }

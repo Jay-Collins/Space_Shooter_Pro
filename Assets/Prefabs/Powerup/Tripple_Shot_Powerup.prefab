@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d61b9d862834fae46b04b64977c584b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _powerupSFXClip: {fileID: 8300000, guid: 5ee343246919d2b4bba63ae629e95494, type: 3}
   _speed: 6
   _powerupID: 0
 --- !u!212 &2757098192984722711
