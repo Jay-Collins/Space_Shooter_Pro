@@ -8,10 +8,11 @@ public class SpawnManager : MonoBehaviour
 {
     private bool _spawnEnabled = true;
     private bool _spawnPowerupEnabled;
+    private int _rareSpawn;
     [SerializeField] private GameObject _enemyContainer, _enemyPrefab;
     [SerializeField] private GameObject[] _powerups;
     [SerializeField] private float _spawnTimer = 5;
-    [SerializeField] private float _trippleShotSpawnTimer;
+    [SerializeField] private float _powerupSpawnTimer;
 
     public void StartSpawning()
     {
@@ -43,11 +44,20 @@ public class SpawnManager : MonoBehaviour
         {
             var randomX = Random.Range(-9.15f, 9.15f);
             Vector3 posToSpawn = new Vector3(randomX, 7.35f, 0);
-            _trippleShotSpawnTimer = Random.Range(8f, 12f);
+            _powerupSpawnTimer = Random.Range(5f, 7f);
 
-            var randomPowerup = Random.Range(0, 3);
-            GameObject newPowerup = Instantiate(_powerups[randomPowerup], posToSpawn, Quaternion.identity);
-            yield return new WaitForSeconds(_trippleShotSpawnTimer);
+            _rareSpawn = Random.Range(0, 13);
+            var randomPowerup = Random.Range(0, 5);
+            if (_rareSpawn != 12)
+            {
+                Instantiate(_powerups[randomPowerup], posToSpawn, Quaternion.identity);
+            }
+            else
+            {
+                Instantiate(_powerups[5], posToSpawn, Quaternion.identity);
+            }
+            yield return new WaitForSeconds(_powerupSpawnTimer);
+            
         }
     }
 

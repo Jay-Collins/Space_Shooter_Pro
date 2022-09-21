@@ -8,6 +8,7 @@ public class Laser : MonoBehaviour
     // speed variable of 8
     private bool _isEnemyLaser;
     [SerializeField] private float _speed = 8.0f;
+    [SerializeField] private AudioClip _playerHitSFX;
 
     // Update is called once per frame
     void Update()
@@ -52,7 +53,11 @@ public class Laser : MonoBehaviour
         {
             Player player = other.GetComponent<Player>();
             // Null check and run player Damage method.
-            if (player != null) player.Damage();
+            if (player != null)
+            {
+                AudioSource.PlayClipAtPoint(_playerHitSFX, transform.position);
+                player.Damage();
+            }
         }
     }
 }

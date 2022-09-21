@@ -9,12 +9,19 @@ public class Player : MonoBehaviour
 {
     private float _speedMultiplier = 1.5f;
     private float _canFire = -1f;
-    private bool _trippleShotEnabled, _shieldsEnabled;
+    private float _timeChangePerSecond;
+    private int _shieldStength = 3;
+    private bool _trippleShotEnabled, _shieldsEnabled, _spreadShotEnabled;
     private bool _movementDisabled;
     private bool _shootingDisabled;
+    private bool _boostDisabled;
+    private bool _boosting;
     private BoxCollider2D _boxCollider2D;
     private AudioSource _audioSource;
+    private SpriteRenderer _shieldSpriteRenderer;
+    
     [SerializeField] private SpriteRenderer _spriteRenderer;
+    [SerializeField] private GameObject _camera;
 
     [Header("Managers")]
     [SerializeField] private SpawnManager _spawnManager;
@@ -23,12 +30,16 @@ public class Player : MonoBehaviour
     [Header("General Settings")]
     [SerializeField] private float _speed = 3.0f;
     [SerializeField] private float _fireRate = 0.5f;
+    [SerializeField] private float _boostTimer = 1f;
     [SerializeField] private int _playerLives = 3;
     [SerializeField] private int _score = 0;
+    [SerializeField] private float _boostSpeedAdded = 5.0f;
+    [SerializeField] private int _ammoCount = 30;
 
     [Header("Power-up Settings")]
     [SerializeField] private float _trippleShotTimer = 5;
     [SerializeField] private float _speedBoostTimer = 5;
+    [SerializeField] private float _spreadShotTimer = 5;
 
     [Header("Prefab Settings")]
     [SerializeField] private GameObject _shieldVisulizer;
@@ -37,8 +48,12 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _thrusterVisualizer;
     [SerializeField] private GameObject _laserPrefab;
     [SerializeField] private GameObject _trippleShotPrefab;
+    [SerializeField] private GameObject _spreadShotPrefab;
     [SerializeField] private GameObject _exposionPrefab;
-
+    
+    [Header("SFX Settings")]
+    [SerializeField] private AudioClip _outOfAmmoSFX;
+    
     // Start is called before the first frame update
 
     private void Awake()
@@ -63,11 +78,20 @@ public class Player : MonoBehaviour
     void Update()
     {
         CalculateMovement();
+        AmmoUpdate();
+        ActivateBoost();
 
         //if (!(Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)) return;
         //ShootLaser();
 
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire) ShootLaser();
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire && _ammoCount >= 1)
+        {
+            ShootLaser();
+        }
+        else if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire && _ammoCount == 0)
+        {
+            AudioSource.PlayClipAtPoint(_outOfAmmoSFX, transform.position); 
+        }
     }
 
     void CalculateMovement()
@@ -98,15 +122,21 @@ public class Player : MonoBehaviour
 
     void ShootLaser()
     {
+        _ammoCount--;
         _canFire = Time.time + _fireRate;
         if (_trippleShotEnabled)
         {
             Instantiate(_trippleShotPrefab, transform.position + new Vector3(0, 0, 0), Quaternion.identity);
             _audioSource.Play();
         }
-        else if (!_shootingDisabled)
+        else if (_spreadShotEnabled)
         {
-            Instantiate(_laserPrefab, transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+            Instantiate(_spreadShotPrefab, transform.position + new Vector3(0, 0, 0), Quaternion.identity);
+            _audioSource.Play();
+        }
+        else if (!_shootingDisabled)
+        { 
+            Instantiate(_laserPrefab, transform.position + new Vector3(0, 1, 0), Quaternion.identity); 
             _audioSource.Play();
         }
     }
@@ -116,14 +146,29 @@ public class Player : MonoBehaviour
         // if shields is active // do nothing // deactivate shields
         if (_shieldsEnabled)
         {
-            _shieldsEnabled = false;
-            _shieldVisulizer.SetActive(false);
-            return;
+            SpriteRenderer _shieldColor = _shieldVisulizer.GetComponent<SpriteRenderer>();
+            _shieldStength--;
+            //null check
+            if (_spriteRenderer == null) return;
+            switch (_shieldStength)
+            {
+                case 2:
+                    _shieldColor.color = new Color(0.25f, 0.69f, 0.25f);
+                    break;
+                case 1:
+                    _shieldColor.color = Color.red;
+                    break;
+                case 0:
+                    _shieldsEnabled = false;
+                    _shieldVisulizer.SetActive(false);
+                    break;
+            }
         }
         else
         {
             _playerLives -= 1;
             _uiManager.LivesUpdate(_playerLives);
+            StartCoroutine(CameraShake());
 
             switch (_playerLives)
             {
@@ -140,6 +185,51 @@ public class Player : MonoBehaviour
         }
     }
 
+    IEnumerator CameraShake()
+    {
+        var shakeTime = new WaitForSeconds(0.05f);
+        Vector3 _defaultPosition = new Vector3(0, 1, -10);
+        
+        yield return shakeTime;
+        _camera.transform.position = new Vector3(0.3f, 1, -10);
+        yield return shakeTime;
+        _camera.transform.position = new Vector3(-0.3f, 1, -10);
+        yield return shakeTime;
+        _camera.transform.position = new Vector3(0, 0.7f, -10);
+        yield return shakeTime;
+        _camera.transform.position = new Vector3(0, 1.3f, -10);
+        yield return shakeTime;
+        _camera.transform.position = _defaultPosition;
+    }
+
+    public void ActivateBoost()
+    {
+        _boosting = Input.GetKey(KeyCode.LeftShift);
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            _speed += _boostSpeedAdded;
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            _speed -= _boostSpeedAdded;
+        }
+
+        switch (_boosting)
+        {
+            case true:
+                _timeChangePerSecond = 0.5f;
+                _boostTimer = Mathf.Clamp((_boostTimer -= _timeChangePerSecond * Time.deltaTime), 0, 1);
+                _uiManager.BoostUpdate(_boostTimer);
+                break;
+            case false:
+                _timeChangePerSecond = 0.1f;
+                _boostTimer = Mathf.Clamp((_boostTimer += _timeChangePerSecond * Time.deltaTime), 0, 1);
+                _uiManager.BoostUpdate(_boostTimer);
+                break;
+        }
+    }
+
     public void TripleShotActive()
     {
         _trippleShotEnabled = true;
@@ -150,6 +240,19 @@ public class Player : MonoBehaviour
     {
         yield return new WaitForSeconds(_trippleShotTimer);
         _trippleShotEnabled = false;
+    }
+
+    public void SpreadShotActive()
+    {
+        _trippleShotEnabled = false;
+        _spreadShotEnabled = true;
+        StartCoroutine(SpreadShotPowerDownRoutine());
+    }
+
+    IEnumerator SpreadShotPowerDownRoutine()
+    {
+        yield return new WaitForSeconds(_spreadShotTimer);
+        _spreadShotEnabled = false;
     }
 
     public void SpeedBoostActive()
@@ -166,8 +269,31 @@ public class Player : MonoBehaviour
 
     public void ShieldsActive()
     {
+        _shieldStength = 3;
         _shieldsEnabled = true; 
         _shieldVisulizer.SetActive(true);
+    }
+
+    // refill players ammo
+    public void RefillAmmo() =>_ammoCount = 30;
+    
+    public void RefillHealth()
+    {
+        if (_playerLives < 3)
+        {
+            _playerLives += 1;
+            _uiManager.LivesUpdate(_playerLives);
+        
+            switch (_playerLives)
+            {
+                case 2:
+                    _rightDamageVisualizer.SetActive(false);
+                    break;
+                case 3:
+                    _leftDamageVisualizer.SetActive(false);
+                    break;
+            }
+        }
     }
 
     // method to add 10 to the score // communicate with UI to update score
@@ -176,6 +302,9 @@ public class Player : MonoBehaviour
         _score += points;
         _uiManager.ScoreUpdate(_score);
     }
+
+    public void AmmoUpdate() => _uiManager.AmmoUpdate(_ammoCount);
+
 
     IEnumerator PlayerDeathSequence()
     {
