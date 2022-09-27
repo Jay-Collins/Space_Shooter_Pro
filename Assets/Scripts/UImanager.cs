@@ -10,13 +10,14 @@ public class UImanager : MonoBehaviour
     private int _ammoAmount = 15;
     private int _score = 0;
     private GameManager _gameManager;
-    
+
     [SerializeField] private Image _boostSlider;
     [SerializeField] private Image _livesImage;
     [SerializeField] private TMP_Text _gameOverText;
     [SerializeField] private TMP_Text _scoreText;
     [SerializeField] private TMP_Text _restartText;
     [SerializeField] private TMP_Text _ammoText;
+    [SerializeField] private TMP_Text _wavesText;
     [SerializeField] private Sprite[] _liveSprites;
 
     // Start is called before the first frame update
@@ -40,14 +41,13 @@ public class UImanager : MonoBehaviour
 
     public void AmmoUpdate(int ammo)
     {
-        _ammoText.text = "Ammo: " + ammo;
+        _ammoText.text = "Ammo: " + ammo + "/30";
     }
     
     public void BoostUpdate(float boost)
     {
         _boostSlider.fillAmount = boost;
     }
-    
     public void LivesUpdate(int currentLives) => _livesImage.sprite = _liveSprites[currentLives];
 
     public void GameOverDisplay()
@@ -67,5 +67,13 @@ public class UImanager : MonoBehaviour
             yield return _waitForSeconds;
             _gameOverText.gameObject.SetActive(true);
         }
+    }
+
+    public IEnumerator Waves(int wave)
+    {
+        _wavesText.gameObject.SetActive(true);
+        _wavesText.text = "Wave: " + wave;
+        yield return new WaitForSeconds(2.5f);
+        _wavesText.gameObject.SetActive(false);
     }
 }

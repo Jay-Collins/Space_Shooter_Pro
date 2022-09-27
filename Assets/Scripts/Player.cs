@@ -7,7 +7,7 @@ using static System.Net.WebRequestMethods;
 
 public class Player : MonoBehaviour
 {
-    private float _speedMultiplier = 1.5f;
+    private float _speedPowerupAdded = 5.0f;
     private float _canFire = -1f;
     private float _timeChangePerSecond;
     private int _shieldStength = 3;
@@ -49,7 +49,7 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _laserPrefab;
     [SerializeField] private GameObject _trippleShotPrefab;
     [SerializeField] private GameObject _spreadShotPrefab;
-    [SerializeField] private GameObject _exposionPrefab;
+    [SerializeField] private GameObject _explosionPrefab;
     
     [Header("SFX Settings")]
     [SerializeField] private AudioClip _outOfAmmoSFX;
@@ -92,6 +92,7 @@ public class Player : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(_outOfAmmoSFX, transform.position); 
         }
+
     }
 
     void CalculateMovement()
@@ -204,6 +205,8 @@ public class Player : MonoBehaviour
 
     public void ActivateBoost()
     {
+
+        if (_boostDisabled) return;
         _boosting = Input.GetKey(KeyCode.LeftShift);
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
@@ -228,6 +231,17 @@ public class Player : MonoBehaviour
                 _uiManager.BoostUpdate(_boostTimer);
                 break;
         }
+        
+        if (!(_boostTimer <= 0f)) return;
+        _speed = 12;
+        StartCoroutine(CannotBoostRoutine());
+    }
+
+    private IEnumerator CannotBoostRoutine()
+    {
+        _boostDisabled = true;
+        yield return new WaitForSeconds(5);
+        _boostDisabled = false;
     }
 
     public void TripleShotActive()
@@ -257,14 +271,14 @@ public class Player : MonoBehaviour
 
     public void SpeedBoostActive()
     {
-        _speed *= _speedMultiplier;
+        _speed += _speedPowerupAdded;
         StartCoroutine(SpeedBoostPowerDownRoutine());
     }
 
     IEnumerator SpeedBoostPowerDownRoutine()
     {
         yield return new WaitForSeconds(_speedBoostTimer);
-        _speed /= _speedMultiplier;
+        _speed -= _speedPowerupAdded;
     }
 
     public void ShieldsActive()
@@ -272,6 +286,15 @@ public class Player : MonoBehaviour
         _shieldStength = 3;
         _shieldsEnabled = true; 
         _shieldVisulizer.SetActive(true);
+    }
+
+    public void Shatter()
+    {
+        Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+        _shieldStength = 0;
+        _shieldsEnabled = false;
+        _shieldVisulizer.SetActive(false);
+        Damage();
     }
 
     // refill players ammo
@@ -308,7 +331,7 @@ public class Player : MonoBehaviour
 
     IEnumerator PlayerDeathSequence()
     {
-        Instantiate(_exposionPrefab, transform.position, Quaternion.identity);
+        Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
         _movementDisabled = true;
         _shootingDisabled = true;
         _trippleShotEnabled = false;

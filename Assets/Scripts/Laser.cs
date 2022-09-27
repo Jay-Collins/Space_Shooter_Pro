@@ -49,15 +49,15 @@ public class Laser : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         //Check if other is "Player" AND _isEnemyLaser is true. 
-        if (other.CompareTag("Player") && _isEnemyLaser)
-        {
-            Player player = other.GetComponent<Player>();
-            // Null check and run player Damage method.
-            if (player != null)
-            {
-                AudioSource.PlayClipAtPoint(_playerHitSFX, transform.position);
-                player.Damage();
-            }
-        }
+        if (other.CompareTag("Enemy") && _isEnemyLaser) return;
+
+        if (!other.CompareTag("Player") || !_isEnemyLaser) return;
+        Player player = other.GetComponent<Player>();
+        
+        // Null check and run player Damage method.
+        if (player == null) return;
+        AudioSource.PlayClipAtPoint(_playerHitSFX, transform.position);
+        player.Damage();
+
     }
 }
