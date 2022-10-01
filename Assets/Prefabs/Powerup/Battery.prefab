@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d61b9d862834fae46b04b64977c584b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerMagnetism: 0
   _explosionPrefab: {fileID: 1068916174163752334, guid: 47a4917916417b943bb842fdbe0099eb, type: 3}
   _powerupSFXClip: {fileID: 8300000, guid: 5ee343246919d2b4bba63ae629e95494, type: 3}
   _speed: 3
@@ -89,8 +90,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1554894639
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 1716417197, guid: e289ab1088d0eda40acd03e18e81541c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

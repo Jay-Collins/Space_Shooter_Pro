@@ -1,11 +1,5 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Xml;
-using TreeEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class Boss : MonoBehaviour

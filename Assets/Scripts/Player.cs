@@ -1,12 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.IO;
-using System.Runtime.CompilerServices;
-using TMPro;
-using UnityEditor.VersionControl;
 using UnityEngine;
-using static System.Net.WebRequestMethods;
 
 public class Player : MonoBehaviour
 {
