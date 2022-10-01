@@ -52,14 +52,14 @@ public class Enemy2 : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (_shieldEnabled) return;
-        
         if (other.CompareTag("Player"))
         {
             switch (_shieldEnabled)
             {
                 case true:
                     _player.Damage();
+                    _shieldEnabled = false;
+                    _shieldVisualizer.SetActive(false);
                     break;
                 case false:
                     _player.Damage();
@@ -77,9 +77,9 @@ public class Enemy2 : MonoBehaviour
                     _shieldEnabled = false;
                     _shieldVisualizer.SetActive(false);
                     break;
-                
                 case false:
                     Destroy(other.gameObject);
+                    // Null check // score update
                     if (_player) _player.ScoreUpdate(10);
                     EnemyDeathSequence();
                     break;
@@ -124,9 +124,10 @@ public class Enemy2 : MonoBehaviour
     
     private void EnemyDeathSequence()
     {
-        _dead = true;
-        Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
         _spawnManager.EnemyKilled();
+        _dead = true;
+        transform.gameObject.tag = "DeadEnemy";
+        Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
         Destroy(_boxCollider2D);
         _speed = 0.5f;
         Destroy(gameObject, 1f);

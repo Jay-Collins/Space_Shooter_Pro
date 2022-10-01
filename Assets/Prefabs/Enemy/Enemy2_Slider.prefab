@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8895897402068602349}
   - component: {fileID: 5920288909109912938}
   m_Layer: 0
-  m_Name: Enemy2
+  m_Name: Enemy2_Slider
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -197,6 +197,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8895897402068602339}
     m_Modifications:
+    - target: {fileID: 2744084155925543882, guid: d4b4a48e8988f4c4c9bbd72d4de3eb78, type: 3}
+      propertyPath: m_SortingLayer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2744084155925543882, guid: d4b4a48e8988f4c4c9bbd72d4de3eb78, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2744084155925543882, guid: d4b4a48e8988f4c4c9bbd72d4de3eb78, type: 3}
+      propertyPath: m_SortingLayerID
+      value: -745726789
+      objectReference: {fileID: 0}
     - target: {fileID: 3493600867161282080, guid: d4b4a48e8988f4c4c9bbd72d4de3eb78, type: 3}
       propertyPath: m_RootOrder
       value: 1

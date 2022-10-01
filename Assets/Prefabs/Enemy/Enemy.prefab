@@ -50,11 +50,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54c123deb87ccc24c8a32f55d4765bed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enemyLaserPrefab: {fileID: 1439607756480247107, guid: f5ee125a6de676f4d8f67cb7de44fc7b, type: 3}
+  distance: 0
+  _enemyLaserPrefab: {fileID: 873784870479205887, guid: 84682737665ac3e4dbe497312c0dfa98, type: 3}
   _shieldVisualizer: {fileID: 7253906988027624981}
-  _speed: 5
+  _speed: 3.5
   _boxCollider2D: {fileID: -2582956723038823465}
   _animator: {fileID: 766162279058658239}
+  offset: {x: 0, y: 3.7, z: 0}
+  size: {x: 1, y: 5, z: 0}
+  direction: {x: 0, y: 1, z: 0}
+  angle: 0
 --- !u!82 &-3871513776421298666
 AudioSource:
   m_ObjectHideFlags: 0
@@ -279,6 +284,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2744084155925543882, guid: d4b4a48e8988f4c4c9bbd72d4de3eb78, type: 3}
       propertyPath: m_SortingLayer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2744084155925543882, guid: d4b4a48e8988f4c4c9bbd72d4de3eb78, type: 3}
+      propertyPath: m_SortingOrder
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2744084155925543882, guid: d4b4a48e8988f4c4c9bbd72d4de3eb78, type: 3}

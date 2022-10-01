@@ -1,17 +1,28 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PowerUp : MonoBehaviour
 {
+    private bool _powerupMovement= true;
+    private Player _player;
+    [SerializeField] bool _playerMagnetism;
+    [SerializeField] private GameObject _explosionPrefab;
     [SerializeField] private AudioClip _powerupSFXClip;
     [SerializeField] private float _speed = 3;
     [SerializeField] private int _powerupID; // 0 = Triple shot, 1= speed, 2= shields.
+
+    private void Awake()
+    {
+        _player = GameObject.Find("Player").GetComponent<Player>();
+    }
 
     // Update is called once per frame
     void Update()
     {
         PowerupMovement();
+        PlayerMagnetism();
     }
 
     // ontriggercollision // only collectable by the player, use tags // on collected destroy // communicate with player script 
@@ -48,6 +59,9 @@ public class PowerUp : MonoBehaviour
                     case 6:
                         player.Shatter();
                         break;
+                    case 7:
+                        player.RefillMissiles();
+                        break;
                 }
             }
             Destroy(gameObject);
@@ -55,13 +69,35 @@ public class PowerUp : MonoBehaviour
     }
 
     // move down at speed of 3 - able to adjust in inspector // When we leave the screen destroy this object
-    void PowerupMovement()
+    private void PowerupMovement()
     {
-        transform.Translate(new Vector3(0, -1f, 0) * _speed * Time.deltaTime);
+        if (_powerupMovement) transform.Translate(new Vector3(0, -1f, 0) * _speed * Time.deltaTime);
+        
+        if (transform.position.y < -6f) Destroy(gameObject);
+    }
 
-        if (transform.position.y < -6f)
+    public void DestroyPowerup()
+    {
+        Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+        Destroy(gameObject);
+    }
+
+    private void PlayerMagnetism()
+    {
+        var _playerMagnetism = Input.GetKey(KeyCode.C);
+
+        if (_playerMagnetism)
         {
-            Destroy(gameObject);
+            _powerupMovement = false;
+            if (!_player) return;
+            var playerPos = _player.transform.position;
+            var enemyPos = transform.position;
+            var moveTowards = (Vector3.MoveTowards(enemyPos, playerPos, _speed * Time.deltaTime));
+            transform.position = moveTowards;
+        }
+        else
+        {
+            _powerupMovement = true;
         }
     }
 }

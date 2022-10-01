@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4252337083406587322}
   m_Layer: 0
   m_Name: Spread_Shot_Powerup
-  m_TagString: Untagged
+  m_TagString: Powerup
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d61b9d862834fae46b04b64977c584b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _explosionPrefab: {fileID: 1068916174163752334, guid: 47a4917916417b943bb842fdbe0099eb, type: 3}
   _powerupSFXClip: {fileID: 8300000, guid: 5ee343246919d2b4bba63ae629e95494, type: 3}
   _speed: 3
   _powerupID: 5

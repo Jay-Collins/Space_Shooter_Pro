@@ -19,7 +19,7 @@ public class Beam : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return; 
         var player = other.GetComponent<Player>();
-            
+        
         if (player == null) return;
         AudioSource.PlayClipAtPoint(_playerHitSFX, transform.position);
         player.Damage();

@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.IO;
+using System.Runtime.CompilerServices;
 using TMPro;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using static System.Net.WebRequestMethods;
 
@@ -10,18 +13,26 @@ public class Player : MonoBehaviour
     private float _speedPowerupAdded = 5.0f;
     private float _canFire = -1f;
     private float _timeChangePerSecond;
+    private int _missiles = 3;
     private int _shieldStength = 3;
+    private int _rng;
     private bool _trippleShotEnabled, _shieldsEnabled, _spreadShotEnabled;
     private bool _movementDisabled;
     private bool _shootingDisabled;
     private bool _boostDisabled;
     private bool _boosting;
+    private bool _missilesDisabled;
+    private bool _spinEnabled;
+    private bool _launchToSideLeft;
+    private bool _launchToSideRight;
+    private Quaternion rotation;
     private BoxCollider2D _boxCollider2D;
     private AudioSource _audioSource;
     private SpriteRenderer _shieldSpriteRenderer;
     
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private GameObject _camera;
+    [SerializeField] private SpriteRenderer _shieldColor;
 
     [Header("Managers")]
     [SerializeField] private SpawnManager _spawnManager;
@@ -50,14 +61,17 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _trippleShotPrefab;
     [SerializeField] private GameObject _spreadShotPrefab;
     [SerializeField] private GameObject _explosionPrefab;
+    [SerializeField] private GameObject _missilePrefab;
     
     [Header("SFX Settings")]
     [SerializeField] private AudioClip _outOfAmmoSFX;
     
+
     // Start is called before the first frame update
 
     private void Awake()
     {
+        _shieldColor = _shieldVisulizer.GetComponent<SpriteRenderer>();
         _boxCollider2D = GetComponent<BoxCollider2D>();
         _audioSource = GetComponent<AudioSource>();
 
@@ -80,9 +94,10 @@ public class Player : MonoBehaviour
         CalculateMovement();
         AmmoUpdate();
         ActivateBoost();
-
-        //if (!(Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)) return;
-        //ShootLaser();
+        FireMissile();
+        Spin();
+        LaunchToSideMovement();
+        ShieldStatus();
 
         if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire && _ammoCount >= 1)
         {
@@ -92,7 +107,6 @@ public class Player : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(_outOfAmmoSFX, transform.position); 
         }
-
     }
 
     void CalculateMovement()
@@ -105,7 +119,7 @@ public class Player : MonoBehaviour
             // new Vector3(1, 0, 0) * input * speed * real time
             var direction = new Vector3(horizontalInput, verticalInput, 0);
 
-            transform.Translate(direction * _speed * Time.deltaTime);
+            transform.Translate(direction * (_speed * Time.deltaTime));
 
             transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, -3.8f, 0), 0);
 
@@ -147,23 +161,7 @@ public class Player : MonoBehaviour
         // if shields is active // do nothing // deactivate shields
         if (_shieldsEnabled)
         {
-            SpriteRenderer _shieldColor = _shieldVisulizer.GetComponent<SpriteRenderer>();
             _shieldStength--;
-            //null check
-            if (_spriteRenderer == null) return;
-            switch (_shieldStength)
-            {
-                case 2:
-                    _shieldColor.color = new Color(0.25f, 0.69f, 0.25f);
-                    break;
-                case 1:
-                    _shieldColor.color = Color.red;
-                    break;
-                case 0:
-                    _shieldsEnabled = false;
-                    _shieldVisulizer.SetActive(false);
-                    break;
-            }
         }
         else
         {
@@ -205,7 +203,6 @@ public class Player : MonoBehaviour
 
     public void ActivateBoost()
     {
-
         if (_boostDisabled) return;
         _boosting = Input.GetKey(KeyCode.LeftShift);
 
@@ -284,6 +281,7 @@ public class Player : MonoBehaviour
     public void ShieldsActive()
     {
         _shieldStength = 3;
+        if (_shieldsEnabled) return;
         _shieldsEnabled = true; 
         _shieldVisulizer.SetActive(true);
     }
@@ -326,12 +324,14 @@ public class Player : MonoBehaviour
         _uiManager.ScoreUpdate(_score);
     }
 
-    public void AmmoUpdate() => _uiManager.AmmoUpdate(_ammoCount);
+    private void AmmoUpdate() => _uiManager.AmmoUpdate(_ammoCount);
 
-
-    IEnumerator PlayerDeathSequence()
+    private IEnumerator PlayerDeathSequence()
     {
-        Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+        var deadExplosion = Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+        _uiManager.PlayerDead();
+        deadExplosion.transform.parent = gameObject.transform;
+        _missilesDisabled = true;
         _movementDisabled = true;
         _shootingDisabled = true;
         _trippleShotEnabled = false;
@@ -344,5 +344,93 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(1.2f);
         _spriteRenderer.enabled = false;
         Destroy(gameObject, 1.7f);
+    }
+
+    private void FireMissile()
+    {
+        if (_missilesDisabled == false && _missiles > 0 && Input.GetKeyDown(KeyCode.E))
+        {
+            Instantiate(_missilePrefab, transform.position + new Vector3(0, 1.65f, 0), Quaternion.identity);
+            _missiles--;
+            _uiManager.MissilesUpdate(_missiles);
+        }
+    }
+
+    public void RefillMissiles()
+    {
+        _missiles = 3;
+        _uiManager.MissilesUpdate(_missiles);
+    }
+
+    public IEnumerator PlayerSpin()
+    {
+        rotation = transform.rotation;
+        _spinEnabled = true;
+        yield return new WaitForSeconds(0.445f);
+        _spinEnabled = false;
+        transform.rotation = rotation;
+    }
+
+    private void Spin()
+    {
+        if (!_spinEnabled) return;
+        var cameraTransform = Camera.main.transform;
+        transform.Rotate(new Vector3(0, 0, 800 * Time.deltaTime), Space.Self);
+    }
+
+    public IEnumerator LaunchToSide()
+    {
+        _rng = Random.Range(1, 3);
+        switch (_rng)
+        {
+            case 1:
+                _movementDisabled = true;
+                _launchToSideLeft = true;
+                yield return new WaitForSeconds(0.1f);
+                _launchToSideLeft = false;
+                _movementDisabled = false;
+                break;
+            case 2:
+                _movementDisabled = true;
+                _launchToSideRight = true;
+                yield return new WaitForSeconds(0.1f);
+                _launchToSideRight = false;
+                _movementDisabled = false;
+                break;
+        }
+    }
+
+    private void LaunchToSideMovement()
+    {
+        if (_launchToSideLeft)
+        {
+            transform.Translate(new Vector3(-6,0,0) * (_speed * Time.deltaTime));
+        }
+        else if (_launchToSideRight)
+        {
+            transform.Translate(new Vector3(6,0,0) * (_speed * Time.deltaTime));
+        }
+    }
+
+    private void ShieldStatus()
+    {
+        //null check
+        if (!_spriteRenderer) return;
+        switch (_shieldStength)
+        {
+            case 3:
+                _shieldColor.color = Color.white;
+                break;
+            case 2:
+                _shieldColor.color = new Color(0.25f, 0.69f, 0.25f);
+                break;
+            case 1:
+                _shieldColor.color = Color.red;
+                break;
+            case 0:
+                _shieldsEnabled = false;
+                _shieldVisulizer.SetActive(false);
+                break;
+        }
     }
 }

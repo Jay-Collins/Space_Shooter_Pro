@@ -13,14 +13,16 @@ public class SpawnManager : MonoBehaviour
     private bool _spawnEnemiesEnabled = true;
     private bool _spawnPowerupEnabled;
     private bool _displayWavesText = true;
+    private bool _finalBoss;
     private int _rareSpawn;
     private int _wave = 1;
     private int _enemiesSpawned;
-    private int _enemiesKilled ;
+    [SerializeField] int _enemiesKilled;
     private int RNG;
 
     private UImanager _uiManager;
     [SerializeField] private GameObject _enemyContainer;
+    [SerializeField] private GameObject _bossPrefab;
     [SerializeField] private GameObject[] _enemyPrefabs;
     [SerializeField] private GameObject[] _rareEnemyPrefabs;
     [SerializeField] private GameObject[] _commonPowerups;
@@ -69,6 +71,22 @@ public class SpawnManager : MonoBehaviour
                 break;
             
             case 4: // boss wave
+                _spawnEnemiesEnabled = false;
+                if (!_finalBoss)
+                {
+                    BossSpawn();
+                    _finalBoss = true;
+                }
+                if (_enemiesSpawned == 1) _spawnEnemiesEnabled = false;
+                if (_enemiesKilled == 1)
+                {
+                    StopCoroutine(_uiManager.Waves(_wave));
+                    NextWave();
+                }
+                break;
+            
+            case 5: // win screen
+                _uiManager.WinScreenDisplay();
                 break;
         }
     }
@@ -91,22 +109,23 @@ public class SpawnManager : MonoBehaviour
     private IEnumerator EnemySpawn()
     {
         yield return new WaitForSeconds(_spawnTimer);
-        while (_spawnEnabled)
+        while (_spawnEnabled && _spawnEnemiesEnabled)
         {
             var randomX = Random.Range(-9.15f, 9.15f);
-            Vector3 posToSpawn = new Vector3(randomX, 7.35f, 0);
+            var posToSpawn = new Vector3(randomX, 7.35f, 0);
             RNG = Random.Range(1, 101);
             
             GameObject newEnemy;
-            _enemiesSpawned++;
             switch (RNG)
             {
-                case < 71:
+                case <= 70:
+                    _enemiesSpawned++;
                     newEnemy = Instantiate(_enemyPrefabs[Random.Range(0, 1)], posToSpawn, Quaternion.identity);
                     newEnemy.transform.parent = _enemyContainer.transform;
                     break;
                 case > 70:
-                    newEnemy = Instantiate(_rareEnemyPrefabs[Random.Range(0, 1)], posToSpawn, Quaternion.identity);
+                    _enemiesSpawned++;
+                    newEnemy = Instantiate(_rareEnemyPrefabs[Random.Range(0, 2)], posToSpawn, Quaternion.identity);
                     newEnemy.transform.parent = _enemyContainer.transform;
                     break;
             }
@@ -123,7 +142,7 @@ public class SpawnManager : MonoBehaviour
         {
             var randomX = Random.Range(-9.15f, 9.15f);
             Vector3 posToSpawn = new Vector3(randomX, 7.35f, 0);
-            _powerupSpawnTimer = Random.Range(1f, 2f);
+            _powerupSpawnTimer = Random.Range(4f, 6f);
 
             RNG = Random.Range(1, 101);
             switch (RNG)
@@ -132,7 +151,7 @@ public class SpawnManager : MonoBehaviour
                     Instantiate(_rarePowerups[Random.Range(0, 2)], posToSpawn, Quaternion.identity);
                     break;
                 case >= 6 and <=20:
-                    Instantiate(_mediumPowerups[Random.Range(0, 1)], posToSpawn, Quaternion.identity);
+                    Instantiate(_mediumPowerups[Random.Range(0, 2)], posToSpawn, Quaternion.identity);
                     break;
                 case >=21 and < 70:
                     Instantiate(_commonPowerups[Random.Range(0, 3)], posToSpawn, Quaternion.identity);
@@ -145,6 +164,8 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
+    private void BossSpawn() => Instantiate(_bossPrefab, new Vector3(0, 11, 0), Quaternion.identity);
+    
     public void EnemyKilled() => _enemiesKilled++;
 
     public void StopSpawning() => _spawnEnabled = false;
