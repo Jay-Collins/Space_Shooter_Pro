@@ -3,8 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private bool _isGameOver;
-    [SerializeField] private bool _isGameWon;
+    private bool _isGameOver; 
+    private bool _isGameWon;
 
     public void Update()
     {
@@ -17,11 +17,14 @@ public class GameManager : MonoBehaviour
             SceneManager.LoadScene(0);
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape)) return;
-        Application.Quit();
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 
     public void GameOver() => _isGameOver = true;
 
     public void GameWin() => _isGameWon = true;
 }
+
