@@ -106,10 +106,10 @@ public class SpawnManager : MonoBehaviour
 
     private void NextWave()
     {
-        _waveStart = true;
         _wave++;
         _displayWavesText = true;
         _enemiesKilled = 0;
+        _waveStart = true;
     }
 
     private void ShowWavesText()
