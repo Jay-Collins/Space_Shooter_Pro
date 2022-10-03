@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour
 {
+    private int _speed = 3;
     private bool _powerupMovement= true;
     private Player _player;
     [SerializeField] private GameObject _explosionPrefab;
     [SerializeField] private AudioClip _powerupSFXClip;
-    [SerializeField] private float _speed = 3;
     [SerializeField] private int _powerupID; // 0 = Triple shot, 1= speed, 2= shields.
 
     private void Awake()

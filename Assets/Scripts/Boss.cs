@@ -20,7 +20,7 @@ public class Boss : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     private Player _player;
     private SpawnManager _spawnManager;
-    [SerializeField] private new Collider2D _collider2D;
+    [SerializeField] private Collider2D _collider2D;
     [SerializeField] private GameObject _beamPrefab;
     [SerializeField] private GameObject _bossLaserPrefab;
     [SerializeField] private GameObject _explosionPrefab;

@@ -8,6 +8,7 @@ public class UImanager : MonoBehaviour
     private int _ammoAmount = 15;
     private int _score = 0;
     private bool _playerDead;
+    private bool _win;
     private GameManager _gameManager;
 
     [SerializeField] private Image _boostSlider;
@@ -57,6 +58,7 @@ public class UImanager : MonoBehaviour
 
     public void GameOverDisplay()
     {
+        if (_win) return;
         _gameManager.GameOver();
         _gameOverText.gameObject.SetActive(true);
         _restartText.gameObject.SetActive(true);

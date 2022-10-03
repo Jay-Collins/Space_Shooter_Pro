@@ -365,16 +365,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47bebb927e8c7b04cb9bbb0fd3fe6e2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collider2D: {fileID: 2176487792457974742}
-  beamPrefab: {fileID: 2047875937843451263, guid: cca549b9542bf774b8f6dc621a611a66, type: 3}
-  bossLaserPrefab: {fileID: 6923280546756261124, guid: cb56e7582af5b4441a7f74cfb713f5ad, type: 3}
-  explosionPrefab: {fileID: 1068916174163752334, guid: 47a4917916417b943bb842fdbe0099eb, type: 3}
-  bossSprite:
+  _collider2D: {fileID: 2176487792457974742}
+  _beamPrefab: {fileID: 2047875937843451263, guid: cca549b9542bf774b8f6dc621a611a66, type: 3}
+  _bossLaserPrefab: {fileID: 6923280546756261124, guid: cb56e7582af5b4441a7f74cfb713f5ad, type: 3}
+  _explosionPrefab: {fileID: 1068916174163752334, guid: 47a4917916417b943bb842fdbe0099eb, type: 3}
+  _bossSprite:
   - {fileID: 21300000, guid: 4efea32aff8c12e409ac735ec49f16eb, type: 3}
   - {fileID: 21300000, guid: 5e326cf655096724289f6d474c528b22, type: 3}
-  firstDamageVisualizer: {fileID: 571401996}
-  secondDamageVisualizer: {fileID: 1948525003}
-  thirdDamageVisualizer: {fileID: 568163263}
+  _firstDamageVisualizer: {fileID: 571401996}
+  _secondDamageVisualizer: {fileID: 1948525003}
+  _thirdDamageVisualizer: {fileID: 568163263}
 --- !u!212 &2927726609678141630
 SpriteRenderer:
   m_ObjectHideFlags: 0

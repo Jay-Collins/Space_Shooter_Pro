@@ -4,16 +4,15 @@ using Random = UnityEngine.Random;
 
 public class SpawnManager : MonoBehaviour
 {
-    private bool _spawnEnabled = true;
-    private bool _spawnEnemiesEnabled = true;
     private bool _spawnPowerupEnabled;
     private bool _displayWavesText = true;
     private bool _finalBoss;
+    private bool _waveStart = true;
     private int _rareSpawn;
     private int _wave = 1;
-    private int _enemiesSpawned;
     private int _enemiesKilled;
     private int _RNG;
+    private int _enemiesToSpawn;
 
     private UImanager _uiManager;
     [SerializeField] private GameObject _enemyContainer;
@@ -40,7 +39,6 @@ public class SpawnManager : MonoBehaviour
 
     public void StartSpawning()
     {
-        StartCoroutine(EnemySpawn());
         StartCoroutine(SpawnPowerupRoutine());
     }
     
@@ -49,28 +47,43 @@ public class SpawnManager : MonoBehaviour
         switch (_wave)
         {
             case 1:
-                if (_enemiesSpawned == 2) _spawnEnemiesEnabled = false;
-                if (_enemiesKilled == 2) NextWave();
+                _enemiesToSpawn = 5;
+                if (_waveStart)
+                {
+                    StartCoroutine(SpawnWave());
+                    _waveStart = false;
+                }
+                if (_enemiesKilled == _enemiesToSpawn) NextWave();
                 break;
             
             case 2:
-                if (_enemiesSpawned == 2) _spawnEnemiesEnabled = false;
-                if (_enemiesKilled == 2) NextWave();
+                _enemiesToSpawn = 8;
+                if (_waveStart)
+                {
+                    StartCoroutine(SpawnWave());
+                    _waveStart = false;
+                }
+                if (_enemiesKilled == _enemiesToSpawn) NextWave();
                 break;
             
             case 3:
-                if (_enemiesSpawned == 2) _spawnEnemiesEnabled = false;
-                if (_enemiesKilled == 2) NextWave();
+                _enemiesToSpawn = 12;
+                if (_waveStart)
+                {
+                    StartCoroutine(SpawnWave());
+                    _waveStart = false;
+                }
+                if (_enemiesKilled == _enemiesToSpawn) NextWave();
                 break;
             
             case 4: // boss wave
-                _spawnEnemiesEnabled = false;
+                _enemiesToSpawn = 1;
                 if (!_finalBoss)
                 {
                     BossSpawn();
+                    _enemiesToSpawn--;
                     _finalBoss = true;
                 }
-                if (_enemiesSpawned == 1) _spawnEnemiesEnabled = false;
                 if (_enemiesKilled == 1)
                 {
                     StopCoroutine(_uiManager.Waves(_wave));
@@ -79,6 +92,7 @@ public class SpawnManager : MonoBehaviour
                 break;
             
             case 5: // win screen
+                _spawnPowerupEnabled = false;
                 _uiManager.WinScreenDisplay();
                 break;
         }
@@ -86,11 +100,10 @@ public class SpawnManager : MonoBehaviour
 
     private void NextWave()
     {
+        _waveStart = true;
         _wave++;
         _displayWavesText = true;
-        _enemiesSpawned = 0;
         _enemiesKilled = 0;
-        _spawnEnemiesEnabled = true;
     }
 
     private void ShowWavesText()
@@ -100,30 +113,23 @@ public class SpawnManager : MonoBehaviour
         _displayWavesText = false;
     }
 
-    private IEnumerator EnemySpawn()
+    private void EnemySpawn()
     {
-        yield return new WaitForSeconds(_spawnTimer);
-        while (_spawnEnabled && _spawnEnemiesEnabled)
-        {
-            var randomX = Random.Range(-9.15f, 9.15f);
-            var posToSpawn = new Vector3(randomX, 7.35f, 0);
-            _RNG = Random.Range(1, 101);
+        var randomX = Random.Range(-9.15f, 9.15f); 
+        var posToSpawn = new Vector3(randomX, 7.35f, 0); 
+        _RNG = Random.Range(1, 101);
             
-            GameObject newEnemy;
-            switch (_RNG)
-            {
-                case <= 70:
-                    _enemiesSpawned++;
-                    newEnemy = Instantiate(_enemyPrefabs[Random.Range(0, 1)], posToSpawn, Quaternion.identity);
-                    newEnemy.transform.parent = _enemyContainer.transform;
-                    break;
-                case > 70:
-                    _enemiesSpawned++;
-                    newEnemy = Instantiate(_rareEnemyPrefabs[Random.Range(0, 2)], posToSpawn, Quaternion.identity);
-                    newEnemy.transform.parent = _enemyContainer.transform;
-                    break;
-            }
-            yield return new WaitForSeconds(_spawnTimer);
+        GameObject newEnemy;
+        switch (_RNG)
+        { 
+            case <= 70: 
+                newEnemy = Instantiate(_enemyPrefabs[Random.Range(0, 1)], posToSpawn, Quaternion.identity); 
+                newEnemy.transform.parent = _enemyContainer.transform; 
+                break;
+            case > 70: 
+                newEnemy = Instantiate(_rareEnemyPrefabs[Random.Range(0, 2)], posToSpawn, Quaternion.identity);
+                newEnemy.transform.parent = _enemyContainer.transform;
+                break;
         }
     }
 
@@ -132,7 +138,7 @@ public class SpawnManager : MonoBehaviour
         yield return new WaitForSeconds(_spawnTimer);
         _spawnPowerupEnabled = true;
 
-        while (_spawnPowerupEnabled && _spawnEnabled )
+        while (_spawnPowerupEnabled)
         {
             var randomX = Random.Range(-9.15f, 9.15f);
             Vector3 posToSpawn = new Vector3(randomX, 7.35f, 0);
@@ -162,5 +168,19 @@ public class SpawnManager : MonoBehaviour
     
     public void EnemyKilled() => _enemiesKilled++;
 
-    public void StopSpawning() => _spawnEnabled = false;
+    public void StopSpawning()
+    {
+        _enemiesToSpawn = -1;
+        _spawnPowerupEnabled = false;
+    }
+
+    private IEnumerator SpawnWave()
+    {
+        for (var spawns = 0; spawns < _enemiesToSpawn; spawns++)
+        {
+            yield return new WaitForSeconds(_spawnTimer);
+            EnemySpawn();
+        }
+    }
 }
+
