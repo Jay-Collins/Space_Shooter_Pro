@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -9,7 +10,7 @@ public class SpawnManager : MonoBehaviour
     private bool _finalBoss;
     private bool _waveStart = true;
     private int _rareSpawn;
-    private int _wave = 1;
+    private int _wave;
     private int _enemiesKilled;
     private int _RNG;
     private int _enemiesToSpawn;
@@ -31,66 +32,71 @@ public class SpawnManager : MonoBehaviour
         _uiManager = GameObject.Find("Canvas").GetComponent<UImanager>();
     }
 
+    private void Start() => StartCoroutine(SpawnPowerupRoutine());
+
     private void Update()
     {
         SpawnWavesRoutine();
+        if (_wave <= 0) return;
         ShowWavesText();
     }
 
-    public void StartSpawning()
-    {
-        StartCoroutine(SpawnPowerupRoutine());
-    }
-    
     private void SpawnWavesRoutine()
     {
         switch (_wave)
         {
             case 1:
+                _spawnPowerupEnabled = true;
                 _enemiesToSpawn = 5;
+                
                 if (_waveStart)
                 {
                     StartCoroutine(SpawnWave());
                     _waveStart = false;
                 }
+                
                 if (_enemiesKilled == _enemiesToSpawn) NextWave();
                 break;
-            
+
             case 2:
                 _enemiesToSpawn = 8;
+                
                 if (_waveStart)
                 {
                     StartCoroutine(SpawnWave());
                     _waveStart = false;
                 }
+                
                 if (_enemiesKilled == _enemiesToSpawn) NextWave();
                 break;
-            
+
             case 3:
                 _enemiesToSpawn = 12;
+                
                 if (_waveStart)
                 {
                     StartCoroutine(SpawnWave());
                     _waveStart = false;
                 }
+                
                 if (_enemiesKilled == _enemiesToSpawn) NextWave();
                 break;
-            
+
             case 4: // boss wave
-                _enemiesToSpawn = 1;
+                _enemiesToSpawn = -1;
+                
                 if (!_finalBoss)
                 {
-                    BossSpawn();
-                    _enemiesToSpawn--;
+                    StartCoroutine(BossSpawn());
                     _finalBoss = true;
                 }
-                if (_enemiesKilled == 1)
+
+                if (_enemiesKilled >= 1)
                 {
-                    StopCoroutine(_uiManager.Waves(_wave));
                     NextWave();
                 }
                 break;
-            
+
             case 5: // win screen
                 _spawnPowerupEnabled = false;
                 _uiManager.WinScreenDisplay();
@@ -115,18 +121,18 @@ public class SpawnManager : MonoBehaviour
 
     private void EnemySpawn()
     {
-        var randomX = Random.Range(-9.15f, 9.15f); 
-        var posToSpawn = new Vector3(randomX, 7.35f, 0); 
+        var randomX = Random.Range(-9.15f, 9.15f);
+        var posToSpawn = new Vector3(randomX, 7.35f, 0);
         _RNG = Random.Range(1, 101);
-            
+
         GameObject newEnemy;
         switch (_RNG)
-        { 
-            case <= 70: 
-                newEnemy = Instantiate(_enemyPrefabs[Random.Range(0, 1)], posToSpawn, Quaternion.identity); 
-                newEnemy.transform.parent = _enemyContainer.transform; 
+        {
+            case <= 70:
+                newEnemy = Instantiate(_enemyPrefabs[Random.Range(0, 1)], posToSpawn, Quaternion.identity);
+                newEnemy.transform.parent = _enemyContainer.transform;
                 break;
-            case > 70: 
+            case > 70:
                 newEnemy = Instantiate(_rareEnemyPrefabs[Random.Range(0, 2)], posToSpawn, Quaternion.identity);
                 newEnemy.transform.parent = _enemyContainer.transform;
                 break;
@@ -136,7 +142,6 @@ public class SpawnManager : MonoBehaviour
     private IEnumerator SpawnPowerupRoutine()
     {
         yield return new WaitForSeconds(_spawnTimer);
-        _spawnPowerupEnabled = true;
 
         while (_spawnPowerupEnabled)
         {
@@ -150,23 +155,31 @@ public class SpawnManager : MonoBehaviour
                 case <= 5:
                     Instantiate(_rarePowerups[Random.Range(0, 2)], posToSpawn, Quaternion.identity);
                     break;
-                case >= 6 and <=20:
+                case >= 6 and <= 20:
                     Instantiate(_mediumPowerups[Random.Range(0, 2)], posToSpawn, Quaternion.identity);
                     break;
-                case >=21 and < 70:
+                case >= 21 and < 70:
                     Instantiate(_commonPowerups[Random.Range(0, 3)], posToSpawn, Quaternion.identity);
                     break;
                 case >= 70:
                     Instantiate(_ammoPickup, posToSpawn, Quaternion.identity);
                     break;
             }
+
             yield return new WaitForSeconds(_powerupSpawnTimer);
         }
     }
 
-    private void BossSpawn() => Instantiate(_bossPrefab, new Vector3(0, 11, 0), Quaternion.identity);
-    
+    private IEnumerator BossSpawn()
+    {
+        yield return new WaitForSeconds(3);
+        Instantiate(_bossPrefab,  new Vector3(0, 11, 0), Quaternion.identity);
+    }
+
+
     public void EnemyKilled() => _enemiesKilled++;
+
+    public void AsteroidDead() => _wave++;
 
     public void StopSpawning()
     {

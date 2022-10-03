@@ -40,7 +40,7 @@ public class Asteroid : MonoBehaviour
             _circleCollider.enabled = false;
             Destroy(other.gameObject);
          
-            _spawnManager.StartSpawning();
+            _spawnManager.AsteroidDead();
             AsteroidDeathSequence();
         }
         else if (other.CompareTag("Player"))
