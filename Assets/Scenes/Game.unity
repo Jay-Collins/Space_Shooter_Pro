@@ -2089,7 +2089,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 991977a4d3d0bdf498b540d5a937dc83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enemiesKilled: 0
   _enemyContainer: {fileID: 890814191}
   _bossPrefab: {fileID: 2927726609678141625, guid: f1cb9729a5aead34c92bb7836a49e911, type: 3}
   _enemyPrefabs:

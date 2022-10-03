@@ -4,7 +4,6 @@ public class PowerUp : MonoBehaviour
 {
     private bool _powerupMovement= true;
     private Player _player;
-    [SerializeField] bool _playerMagnetism;
     [SerializeField] private GameObject _explosionPrefab;
     [SerializeField] private AudioClip _powerupSFXClip;
     [SerializeField] private float _speed = 3;
@@ -68,7 +67,7 @@ public class PowerUp : MonoBehaviour
     // move down at speed of 3 - able to adjust in inspector // When we leave the screen destroy this object
     private void PowerupMovement()
     {
-        if (_powerupMovement) transform.Translate(new Vector3(0, -1f, 0) * _speed * Time.deltaTime);
+        if (_powerupMovement) transform.Translate(new Vector3(0, -1f, 0) * (_speed * Time.deltaTime));
         
         if (transform.position.y < -6f) Destroy(gameObject);
     }

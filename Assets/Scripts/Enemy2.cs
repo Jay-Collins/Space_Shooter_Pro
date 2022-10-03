@@ -13,7 +13,6 @@ public class Enemy2 : MonoBehaviour
     private Vector3 _movement;
     private Player _player;
     [SerializeField] float _speed = 2f;
-    [SerializeField] private AudioSource _audioSource;
     [SerializeField] private GameObject _explosionPrefab;
     [SerializeField] private BoxCollider2D _boxCollider2D;
     [SerializeField] private GameObject _beamPrefab;
@@ -23,7 +22,6 @@ public class Enemy2 : MonoBehaviour
     {
         _player = GameObject.Find("Player").GetComponent<Player>();
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
-        _audioSource = GetComponent<AudioSource>();
         _movement = new Vector3(0f, -1f, 0f);
     }
 

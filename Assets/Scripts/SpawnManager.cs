@@ -12,8 +12,8 @@ public class SpawnManager : MonoBehaviour
     private int _rareSpawn;
     private int _wave = 1;
     private int _enemiesSpawned;
-    [SerializeField] int _enemiesKilled;
-    private int RNG;
+    private int _enemiesKilled;
+    private int _RNG;
 
     private UImanager _uiManager;
     [SerializeField] private GameObject _enemyContainer;
@@ -49,20 +49,18 @@ public class SpawnManager : MonoBehaviour
         switch (_wave)
         {
             case 1:
-                if (_enemiesSpawned == 8) _spawnEnemiesEnabled = false;
-                if (_enemiesKilled == 8) NextWave();
+                if (_enemiesSpawned == 2) _spawnEnemiesEnabled = false;
+                if (_enemiesKilled == 2) NextWave();
                 break;
             
             case 2:
-                _spawnEnemiesEnabled = true;
-                if (_enemiesSpawned == 12) _spawnEnemiesEnabled = false;
-                if (_enemiesKilled == 12) NextWave();
+                if (_enemiesSpawned == 2) _spawnEnemiesEnabled = false;
+                if (_enemiesKilled == 2) NextWave();
                 break;
             
             case 3:
-                _spawnEnemiesEnabled = true;
-                if (_enemiesSpawned == 16) _spawnEnemiesEnabled = false;
-                if (_enemiesKilled == 16) NextWave();
+                if (_enemiesSpawned == 2) _spawnEnemiesEnabled = false;
+                if (_enemiesKilled == 2) NextWave();
                 break;
             
             case 4: // boss wave
@@ -92,6 +90,7 @@ public class SpawnManager : MonoBehaviour
         _displayWavesText = true;
         _enemiesSpawned = 0;
         _enemiesKilled = 0;
+        _spawnEnemiesEnabled = true;
     }
 
     private void ShowWavesText()
@@ -108,10 +107,10 @@ public class SpawnManager : MonoBehaviour
         {
             var randomX = Random.Range(-9.15f, 9.15f);
             var posToSpawn = new Vector3(randomX, 7.35f, 0);
-            RNG = Random.Range(1, 101);
+            _RNG = Random.Range(1, 101);
             
             GameObject newEnemy;
-            switch (RNG)
+            switch (_RNG)
             {
                 case <= 70:
                     _enemiesSpawned++;
@@ -139,8 +138,8 @@ public class SpawnManager : MonoBehaviour
             Vector3 posToSpawn = new Vector3(randomX, 7.35f, 0);
             _powerupSpawnTimer = Random.Range(4f, 6f);
 
-            RNG = Random.Range(1, 101);
-            switch (RNG)
+            _RNG = Random.Range(1, 101);
+            switch (_RNG)
             {
                 case <= 5:
                     Instantiate(_rarePowerups[Random.Range(0, 2)], posToSpawn, Quaternion.identity);

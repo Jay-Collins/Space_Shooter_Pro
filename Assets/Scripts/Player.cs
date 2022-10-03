@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
     private bool _spinEnabled;
     private bool _launchToSideLeft;
     private bool _launchToSideRight;
-    private Quaternion rotation;
+    private Quaternion _rotation;
     private BoxCollider2D _boxCollider2D;
     private AudioSource _audioSource;
     private SpriteRenderer _shieldSpriteRenderer;
@@ -357,11 +357,11 @@ public class Player : MonoBehaviour
 
     public IEnumerator PlayerSpin()
     {
-        rotation = transform.rotation;
+        _rotation = transform.rotation;
         _spinEnabled = true;
         yield return new WaitForSeconds(0.445f);
         _spinEnabled = false;
-        transform.rotation = rotation;
+        transform.rotation = _rotation;
     }
 
     private void Spin()

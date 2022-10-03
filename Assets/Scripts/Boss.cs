@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 public class Boss : MonoBehaviour
 {
     private int _speed = 2;
-    private int _health = 200;
+    private int _health = 50;
     private int _rng;
     private bool _arrival;
     private bool _rammingShake;
@@ -20,14 +20,14 @@ public class Boss : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     private Player _player;
     private SpawnManager _spawnManager;
-    [SerializeField] private Collider2D collider2D;
-    [SerializeField] private GameObject beamPrefab;
-    [SerializeField] private GameObject bossLaserPrefab;
-    [SerializeField] private GameObject explosionPrefab;
-    [SerializeField] private Sprite[] bossSprite;
-    [SerializeField] private GameObject firstDamageVisualizer;
-    [SerializeField] private GameObject secondDamageVisualizer;
-    [SerializeField] private GameObject thirdDamageVisualizer;
+    [SerializeField] private new Collider2D _collider2D;
+    [SerializeField] private GameObject _beamPrefab;
+    [SerializeField] private GameObject _bossLaserPrefab;
+    [SerializeField] private GameObject _explosionPrefab;
+    [SerializeField] private Sprite[] _bossSprite;
+    [SerializeField] private GameObject _firstDamageVisualizer;
+    [SerializeField] private GameObject _secondDamageVisualizer;
+    [SerializeField] private GameObject _thirdDamageVisualizer;
 
     // Start is called before the first frame update
     private void Start()
@@ -94,14 +94,14 @@ public class Boss : MonoBehaviour
             
             switch (_health)
             {
-                case 75:
-                    firstDamageVisualizer.SetActive(true);
-                    break;
-                case 50:
-                    secondDamageVisualizer.SetActive(true);
+                case 40:
+                    _firstDamageVisualizer.SetActive(true);
                     break;
                 case 25:
-                    thirdDamageVisualizer.SetActive(true);
+                    _secondDamageVisualizer.SetActive(true);
+                    break;
+                case 10:
+                    _thirdDamageVisualizer.SetActive(true);
                     break;
                 case <= 0:
                     if (_dead) return;
@@ -124,9 +124,9 @@ public class Boss : MonoBehaviour
 
     private IEnumerator DamageFlash()
     {
-        _spriteRenderer.sprite = bossSprite[1];
+        _spriteRenderer.sprite = _bossSprite[1];
         yield return new WaitForSeconds(0.05f);
-        _spriteRenderer.sprite = bossSprite[0];
+        _spriteRenderer.sprite = _bossSprite[0];
     }
 
     private IEnumerator RamShake()
@@ -193,11 +193,11 @@ public class Boss : MonoBehaviour
             yield return new WaitForSeconds(2f);
             if (!_shootingEnabled) continue;
             // left beam
-            Instantiate(beamPrefab, new Vector3(transform.position.x + 0.9f, transform.position.y - 10.25f, 0), Quaternion.identity);
+            Instantiate(_beamPrefab, new Vector3(transform.position.x + 0.9f, transform.position.y - 10.25f, 0), Quaternion.identity);
             yield return beamPause;
             if (!_shootingEnabled) continue;
             // right beam
-            Instantiate(beamPrefab, new Vector3(transform.position.x - 0.9f, transform.position.y - 10.25f, 0), Quaternion.identity);
+            Instantiate(_beamPrefab, new Vector3(transform.position.x - 0.9f, transform.position.y - 10.25f, 0), Quaternion.identity);
         }
     }
 
@@ -235,7 +235,7 @@ public class Boss : MonoBehaviour
         {
             yield return new WaitForSeconds(2f);
             if (!_shootingEnabled) continue;
-            Instantiate(bossLaserPrefab, new Vector3(transform.position.x, transform.position.y - 5.05f, 0), Quaternion.identity);
+            Instantiate(_bossLaserPrefab, new Vector3(transform.position.x, transform.position.y - 5.05f, 0), Quaternion.identity);
         }
     }
 
@@ -249,8 +249,8 @@ public class Boss : MonoBehaviour
         _ram = false;
         StopCoroutine(BattleManager());
         StopCoroutine(StrafeCountdown());
-        collider2D.enabled = false;
-        var finalExplosion = Instantiate(explosionPrefab, new Vector3(transform.position.x, transform.position.y, 0), Quaternion.identity);
+        _collider2D.enabled = false;
+        var finalExplosion = Instantiate(_explosionPrefab, new Vector3(transform.position.x, transform.position.y, 0), Quaternion.identity);
         finalExplosion.transform.localScale = new Vector3(3f, 3f, 3f);
         yield return new WaitForSeconds(0.5f);
         _spawnManager.EnemyKilled();

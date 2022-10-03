@@ -7,7 +7,6 @@ public class Missile_Player : MonoBehaviour
     [SerializeField] private float speed = 7;
     private GameObject[] _potentialTargets;
     private GameObject _target;
-    private SpriteRenderer _missileSprite;
     private Rigidbody2D _rb;
     private Vector3 _moveTowards;
     private Vector3 _direction;
@@ -18,7 +17,6 @@ public class Missile_Player : MonoBehaviour
         //Debug.Break();
         DetectTarget();
         _rb = GetComponent<Rigidbody2D>();
-        _missileSprite = GetComponent<SpriteRenderer>();
     }
 
     private void Update()

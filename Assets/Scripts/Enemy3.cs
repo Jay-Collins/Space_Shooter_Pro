@@ -20,11 +20,11 @@ public class Enemy3 : MonoBehaviour
     [SerializeField] private float _speed = 3f;
     
     [Header("Powerup Detector Settings")] 
-    [SerializeField] private Vector3 offset;
-    [SerializeField] private Vector3 size;
-    [SerializeField] private Vector3 direction;
-    [SerializeField] private float angle;
-    private RaycastHit2D hit;
+    [SerializeField] private Vector3 _offset;
+    [SerializeField] private Vector3 _size;
+    [SerializeField] private Vector3 _direction;
+    [SerializeField] private float _angle;
+    private RaycastHit2D _hit;
 
     private void Awake()
     {
@@ -118,15 +118,15 @@ public class Enemy3 : MonoBehaviour
     {
         while (true)
         {
-            hit = Physics2D.BoxCast(transform.position - offset, size, angle, direction);
+            _hit = Physics2D.BoxCast(transform.position - _offset, _size, _angle, _direction);
             // Debug.Log(hit.collider.gameObject);
-            if (!hit)
+            if (!_hit)
             {
                 yield return new WaitForSeconds(0.5f);
                 continue;
             }
 
-            if (hit.collider.CompareTag("Powerup"))
+            if (_hit.collider.CompareTag("Powerup"))
             {
                 FireForwards();
             }
@@ -138,7 +138,7 @@ public class Enemy3 : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(transform.position - offset, size); // actual size of BoxCast is infinity
+        Gizmos.DrawWireCube(transform.position - _offset, _size); // actual size of BoxCast is infinity
     }
     
     private void EnemyDeathSequence()

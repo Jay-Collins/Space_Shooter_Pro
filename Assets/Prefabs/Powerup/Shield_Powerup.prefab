@@ -50,7 +50,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _explosionPrefab: {fileID: 1068916174163752334, guid: 47a4917916417b943bb842fdbe0099eb, type: 3}
   _powerupSFXClip: {fileID: 8300000, guid: 5ee343246919d2b4bba63ae629e95494, type: 3}
-  _speed: 4
+  _speed: 3
   _powerupID: 2
 --- !u!212 &8253434389862202985
 SpriteRenderer:

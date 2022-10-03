@@ -48,10 +48,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d61b9d862834fae46b04b64977c584b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerMagnetism: 0
   _explosionPrefab: {fileID: 1068916174163752334, guid: 47a4917916417b943bb842fdbe0099eb, type: 3}
   _powerupSFXClip: {fileID: 8300000, guid: 5ee343246919d2b4bba63ae629e95494, type: 3}
-  _speed: 6
+  _speed: 3
   _powerupID: 0
 --- !u!212 &2757098192984722711
 SpriteRenderer:
@@ -161,7 +160,8 @@ Animation:
   m_Enabled: 1
   serializedVersion: 3
   m_Animation: {fileID: 7400000, guid: 23bd02fb9f496ae47b624d92940aba91, type: 2}
-  m_Animations: []
+  m_Animations:
+  - {fileID: 7400000, guid: 23bd02fb9f496ae47b624d92940aba91, type: 2}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
